@@ -37,20 +37,57 @@ export const StarIcon = () => (
   </svg>
 )
 
-export const ChatBtn: FC<{ onClick: () => void; className?: string }> = ({
+export const ChatBtn: FC<{ 
+  onClick: () => void; 
+  className?: string;
+  isAuthenticated?: boolean;
+  isLoading?: boolean;
+}> = ({
   className,
   onClick,
+  isAuthenticated = false,
+  isLoading = false,
 }) => {
   const { t } = useTranslation()
+  
+  const getButtonText = () => {
+    if (isLoading) return 'Loading...'
+    if (!isAuthenticated) return 'Login with Microsoft'
+    return t('app.chat.startChat')
+  }
+
+  const getButtonIcon = () => {
+    if (isLoading) {
+      return (
+        <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      )
+    }
+    if (!isAuthenticated) {
+      return (
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM10 18C5.59 18 2 14.41 2 10C2 5.59 5.59 2 10 2C14.41 2 18 5.59 18 10C18 14.41 14.41 18 10 18Z" fill="white"/>
+          <path d="M10 4C7.79 4 6 5.79 6 8C6 10.21 7.79 12 10 12C12.21 12 14 10.21 14 8C14 5.79 12.21 4 10 4ZM10 10C8.9 10 8 9.1 8 8C8 6.9 8.9 6 10 6C11.1 6 12 6.9 12 8C12 9.1 11.1 10 10 10Z" fill="white"/>
+        </svg>
+      )
+    }
+    return (
+      <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path fillRule="evenodd" clipRule="evenodd" d="M18 10.5C18 14.366 14.418 17.5 10 17.5C8.58005 17.506 7.17955 17.1698 5.917 16.52L2 17.5L3.338 14.377C2.493 13.267 2 11.934 2 10.5C2 6.634 5.582 3.5 10 3.5C14.418 3.5 18 6.634 18 10.5ZM7 9.5H5V11.5H7V9.5ZM15 9.5H13V11.5H15V9.5ZM9 9.5H11V11.5H9V9.5Z" fill="white" />
+      </svg>
+    )
+  }
+
   return (
     <Button
       type='primary'
       className={cn(className, `space-x-2 flex items-center ${s.customBtn}`)}
-      onClick={onClick}>
-      <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path fillRule="evenodd" clipRule="evenodd" d="M18 10.5C18 14.366 14.418 17.5 10 17.5C8.58005 17.506 7.17955 17.1698 5.917 16.52L2 17.5L3.338 14.377C2.493 13.267 2 11.934 2 10.5C2 6.634 5.582 3.5 10 3.5C14.418 3.5 18 6.634 18 10.5ZM7 9.5H5V11.5H7V9.5ZM15 9.5H13V11.5H15V9.5ZM9 9.5H11V11.5H9V9.5Z" fill="white" />
-      </svg>
-      {t('app.chat.startChat')}
+      onClick={onClick}
+      disabled={isLoading}>
+      {getButtonIcon()}
+      {getButtonText()}
     </Button>
   )
 }

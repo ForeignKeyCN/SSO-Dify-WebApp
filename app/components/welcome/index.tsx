@@ -10,6 +10,7 @@ import type { AppInfo, PromptConfig } from '@/types/app'
 import Toast from '@/app/components/base/toast'
 import Select from '@/app/components/base/select'
 import { DEFAULT_VALUE_MAX_LEN } from '@/config'
+import { useAuth } from '@/hooks/use-auth'
 
 // regex to match the {{}} and replace it with a span
 const regex = /\{\{([^}]+)\}\}/g
@@ -39,6 +40,7 @@ const Welcome: FC<IWelcomeProps> = ({
 }) => {
   console.log(promptConfig)
   const { t } = useTranslation()
+  const { isAuthenticated, isLoading, login } = useAuth()
   const hasVar = promptConfig.prompt_variables.length > 0
   const [isFold, setIsFold] = useState<boolean>(true)
   const [inputs, setInputs] = useState<Record<string, any>>((() => {
@@ -175,6 +177,12 @@ const Welcome: FC<IWelcomeProps> = ({
   }
 
   const canChat = () => {
+    // First check if user is authenticated
+    if (!isAuthenticated) {
+      logError(t('app.errorMessage.authenticationRequired') || 'Please login with your Microsoft account first')
+      return false
+    }
+
     const inputLens = Object.values(inputs).length
     const promptVariablesLens = promptConfig.prompt_variables.length
     const emptyInput = inputLens < promptVariablesLens || Object.entries(inputs).filter(([k, v]) => {
@@ -189,6 +197,13 @@ const Welcome: FC<IWelcomeProps> = ({
   }
 
   const handleChat = () => {
+    // If not authenticated, start OAuth flow
+    if (!isAuthenticated) {
+      login()
+      return
+    }
+
+    // If authenticated but inputs are invalid, show error
     if (!canChat())
       return
 
@@ -212,7 +227,11 @@ const Welcome: FC<IWelcomeProps> = ({
               </>
             }
           >
-            <ChatBtn onClick={handleChat} />
+            <ChatBtn 
+              onClick={handleChat} 
+              isAuthenticated={isAuthenticated}
+              isLoading={isLoading}
+            />
           </TemplateVarPanel>
         </div>
       )
@@ -225,7 +244,11 @@ const Welcome: FC<IWelcomeProps> = ({
           <AppInfoComp siteInfo={siteInfo} />
         }
       >
-        <ChatBtn onClick={handleChat} />
+        <ChatBtn 
+          onClick={handleChat} 
+          isAuthenticated={isAuthenticated}
+          isLoading={isLoading}
+        />
       </TemplateVarPanel>
     )
   }
@@ -242,6 +265,8 @@ const Welcome: FC<IWelcomeProps> = ({
         <ChatBtn
           className='mt-3 mobile:ml-0 tablet:ml-[128px]'
           onClick={handleChat}
+          isAuthenticated={isAuthenticated}
+          isLoading={isLoading}
         />
       </TemplateVarPanel>
     )
